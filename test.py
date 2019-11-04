@@ -44,12 +44,12 @@ rads_ort = degs_ort * (np.pi/180)
 
 # getting x, y components on the unit circle
 # will scale by speed at some point
-x_dirs = np.array(np.cos(rads_dir)).reshape(-1, 1)
-y_dirs = np.array(np.sin(rads_dir)).reshape(-1, 1)
+x_dirs = np.array(np.sin(rads_dir)).reshape(-1, 1)
+y_dirs = np.array(np.cos(rads_dir)).reshape(-1, 1)
 dir_vecs = np.concatenate([x_dirs, y_dirs], axis=1)
 
-x_orts = np.array(np.cos(rads_ort)).reshape(-1, 1)
-y_orts = np.array(np.sin(rads_ort)).reshape(-1, 1)
+x_orts = np.array(np.sin(rads_ort)).reshape(-1, 1)
+y_orts = np.array(np.cos(rads_ort)).reshape(-1, 1)
 ort_vecs = np.concatenate([x_orts, y_orts], axis=1)
 
 # getting the origin of the vectors to plot, i.e. player positions
