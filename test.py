@@ -29,7 +29,6 @@ color_ids[rusher] = 'green'
 
 # show player position in first play in scatter plot with colors
 plt.scatter(play_data['X'], play_data['Y'], color=color_ids)
-# plt.show()
 
 # TODO (1) Plot vectors with orientation and direction of movement
 #      (2) Scale direction of movement vectors by speed and accel
@@ -40,11 +39,18 @@ plt.scatter(play_data['X'], play_data['Y'], color=color_ids)
 degs_dir = play_data['Dir']
 rads_dir = degs_dir * (np.pi/180)
 
+degs_ort = play_data['Orientation']
+rads_ort = degs_ort * (np.pi/180)
+
 # getting x, y components on the unit circle
 # will scale by speed at some point
 x_dirs = np.array(np.cos(rads_dir)).reshape(-1, 1)
 y_dirs = np.array(np.sin(rads_dir)).reshape(-1, 1)
 dir_vecs = np.concatenate([x_dirs, y_dirs], axis=1)
+
+x_orts = np.array(np.cos(rads_ort)).reshape(-1, 1)
+y_orts = np.array(np.sin(rads_ort)).reshape(-1, 1)
+ort_vecs = np.concatenate([x_orts, y_orts], axis=1)
 
 # getting the origin of the vectors to plot, i.e. player positions
 x_pos = np.array(play_data['X']).reshape(-1,1)
@@ -52,12 +58,17 @@ y_pos = np.array(play_data['Y']).reshape(-1,1)
 pos = np.concatenate([x_pos, y_pos], axis=1)
 
 # plot the vectors ...
-# not quite correct, need to take into account direction of play
 plt.quiver(
     pos[:, 0], pos[:, 1],
     dir_vecs[:, 0], dir_vecs[:, 1],
     color=color_ids, scale=50
 )
+plt.quiver(
+    pos[:, 0], pos[:, 1],
+    ort_vecs[:, 0], ort_vecs[:, 1],
+    color=color_ids, scale=25
+)
+
 plt.show()
 
 # TODO -- Project: Calculating player influence
