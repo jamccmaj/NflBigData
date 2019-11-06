@@ -12,7 +12,14 @@ from scipy.stats import multivariate_normal as mvn
 
 play = int(sys.argv[1])
 
-homedir = os.environ['HOME']
+# adapt for windows
+try:
+    homedir = os.environ['HOME']
+except KeyError:
+    homedir = os.path.join(
+        os.environ['HOMEDRIVE'], os.environ['HOMEPATH']
+    )
+
 datapath = os.path.join(
     homedir, 'dev/NflBigData/data/kaggle/train.csv'
 )
