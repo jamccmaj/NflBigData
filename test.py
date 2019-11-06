@@ -28,6 +28,7 @@ rusher = np.argmax(
 
 color_ids = ['red'] * 11 + ['blue'] * 11
 color_ids[rusher] = 'green'
+color_ids[11] = 'black'
 
 # show player position in first play in scatter plot with colors
 plt.scatter(play_data['X'], play_data['Y'], color=color_ids)
@@ -65,11 +66,11 @@ plt.quiver(
     dir_vecs[:, 0], dir_vecs[:, 1],
     color=color_ids, scale=50
 )
-plt.quiver(
-    pos[:, 0], pos[:, 1],
-    ort_vecs[:, 0], ort_vecs[:, 1],
-    color=color_ids, scale=25
-)
+# plt.quiver(
+#     pos[:, 0], pos[:, 1],
+#     ort_vecs[:, 0], ort_vecs[:, 1],
+#     color=color_ids, scale=25
+# )
 
 plt.show()
 
@@ -101,8 +102,8 @@ S = np.array([[Sx, 0], [0, Sy]])
 Sigma = R @ S @ S @ np.linalg.inv(R)
 
 
-player_x_pos = play_data.iloc[11].X
-player_y_pos = play_data.iloc[11].Y
+player_x_pos = int(round(play_data.iloc[11].X))
+player_y_pos = int(round(play_data.iloc[11].Y))
 mvn_for_player_test = mvn(mean=[0, 0], cov=Sigma)
 mvn_for_player = mvn(
     mean=[player_y_pos, player_x_pos], cov=Sigma
@@ -112,13 +113,15 @@ mvn_for_player = mvn(
 image_wd, image_ht = 120, 57
 # just checking to make sure the pdf computation is correct
 # either uses centered mvn or one centered at player position
+# need to account for difference in coordinates between numpy and nfl data
 player_influence_image = np.zeros((image_ht, image_wd))
 player_influence_image_test = np.zeros((image_ht, image_wd))
 
-x, y = player_x_pos, player_y_pos
+x, y = player_x_pos, image_ht - player_y_pos
 for i, (a, b) in enumerate(
     itertools.product(range(image_ht), range(image_wd))
 ):
+    a = (image_ht - 1) - a
     player_influence_image_test[a, b] = mvn_for_player_test.pdf([y-a, x-b])
     player_influence_image[a, b] = mvn_for_player.pdf([a, b])
 
