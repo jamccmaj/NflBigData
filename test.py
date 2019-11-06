@@ -10,6 +10,9 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from scipy.stats import multivariate_normal as mvn
 
+def sigmoid(x):
+    return 1/(1 + np.exp(-x))
+
 play = int(sys.argv[1])
 
 # adapt for windows
@@ -83,8 +86,8 @@ plt.quiver(
 plt.show()
 
 # TODO -- Project: Calculating player influence
-# (1) Generate mesh grid, which will be image pixels
-# (2) Calculate influence for each player and point on the image
+# (1, done) Generate mesh grid, which will be image pixels
+# (2, done) Calculate influence for each player and point on the image
 # Note: should be 11 images for defense, 10 for offense, still deciding for ball carrier
 # (3) Add images together for defense and offense separately
 # (4) Take difference between summed images for defense and offense, sigmoid it for a single image
@@ -103,7 +106,7 @@ R = np.array(
     ]
 )
 
-# compute eigenvalues using projection of speed onto unit eigen vectors
+# compute eigenvalues using projection of speed onto unit eigenvectors
 Sx = play_data.iloc[11].S * np.cos(theta)
 Sy = play_data.iloc[11].S * np.sin(theta)
 S = np.array([[Sx, 0], [0, Sy]])
@@ -128,3 +131,46 @@ for i, (a, b) in enumerate(
 fig, ax = plt.subplots(1)
 ax.imshow(player_influence_image, origin='lower')
 fig.savefig("./data/player_influence_image.png", dpi=300)
+
+image_wd, image_ht = 120, 57
+player_influence_images = np.zeros((len(play_data), image_ht, image_wd))
+for x in range(len(play_data)):
+    # adjust angle for standard unit circle
+    theta = -(rads_dir[x] - (np.pi/2))
+
+    # rotation matrix for above angle
+    R = np.array(
+        [
+            [np.cos(theta), -np.sin(theta)],
+            [np.sin(theta), np.cos(theta)]
+        ]
+    )
+
+    # compute eigenvalues using projection of speed onto unit eigenvectors
+    Sx = play_data.iloc[x].S * np.cos(theta)
+    Sy = play_data.iloc[x].S * np.sin(theta)
+    S = np.array([[Sx, 0], [0, Sy]])
+
+    Sigma = R @ S @ S @ np.linalg.inv(R)
+
+    player_x_pos = int(round(play_data.iloc[x].X))
+    player_y_pos = int(round(play_data.iloc[x].Y))
+
+    mvn_for_player = mvn(mean=[player_x_pos, player_y_pos], cov=Sigma)
+    for i, (a, b) in enumerate(
+        itertools.product(range(image_ht), range(image_wd))
+    ):
+        a = image_ht - a - 1
+        player_influence_images[x, a, b] = mvn_for_player.pdf([b, a])
+
+team_1 = player_influence_images[:11, :, :].sum(axis=0)
+team_2 = player_influence_images[11:, :, :].sum(axis=0)
+
+prob_of_ctrl = sigmoid(team_1 - team_2)
+
+fig, ax = plt.subplots(3)
+ax[0].imshow(prob_of_ctrl, origin='lower')
+ax[1].imshow(team_1, origin='lower')
+ax[2].imshow(team_2, origin='lower')
+
+fig.savefig("./data/sigmoid_player_influences.png", dpi=300)
