@@ -127,8 +127,17 @@ for i, (a, b) in enumerate(
     a = image_ht - a - 1
     player_influence_image[a, b] = mvn_for_player.pdf([b, a])
 
-fig, ax = plt.subplots(1)
-ax.imshow(player_influence_image, origin='lower')
+a, b = zip(*list(
+    itertools.product(range(image_ht), range(image_wd))
+))
+
+player_influence_image_test = np.zeros((image_ht, image_wd))
+player_influence_image_test[a, b] = mvn_for_player.pdf(list(zip(b, a)))
+
+fig, ax = plt.subplots(2)
+ax[0].imshow(player_influence_image, origin='lower')
+ax[1].imshow(player_influence_image_test, origin='lower')
+
 fig.savefig("./data/player_influence_image.png", dpi=300)
 
 image_wd, image_ht = 120, 57
