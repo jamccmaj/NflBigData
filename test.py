@@ -10,8 +10,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from scipy.stats import multivariate_normal as mvn
 
-def sigmoid(x):
-    return 1/(1 + np.exp(-x))
+from utils.math import sigmoid
 
 play = int(sys.argv[1])
 
@@ -147,8 +146,8 @@ for x in range(len(play_data)):
     )
 
     # compute eigenvalues using projection of speed onto unit eigenvectors
-    Sx = play_data.iloc[x].S * np.cos(theta)
-    Sy = play_data.iloc[x].S * np.sin(theta)
+    Sx = play_data.iloc[x].S * np.cos(theta) * play_data.iloc[x].A
+    Sy = play_data.iloc[x].S * np.sin(theta) * play_data.iloc[x].A
     S = np.array([[Sx, 0], [0, Sy]])
 
     Sigma = R @ S @ S @ np.linalg.inv(R)
@@ -162,6 +161,9 @@ for x in range(len(play_data)):
     ):
         a = image_ht - a - 1
         player_influence_images[x, a, b] = mvn_for_player.pdf([b, a])
+
+    player_influence_images[x] = sigmoid(player_influence_images[x])
+    # player_influence_images[x] /= player_influence_images[x].max()
 
 team_1 = player_influence_images[:11, :, :].sum(axis=0)
 team_2 = player_influence_images[11:, :, :].sum(axis=0)
