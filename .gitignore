@@ -1,3 +1,4 @@
 data/
 NflBigData.*
 notebooks/.ipynb_checkpoints/
+.vscode/
