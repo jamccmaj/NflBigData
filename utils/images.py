@@ -56,6 +56,17 @@ def compute_image_for_team(play_data, image_wd, image_ht):
     return images
 
 
+def compute_control_images(play_data, image_wd, image_ht):
+    home = play_data[play_data.Team == 'home']
+    away = play_data[play_data.Team == 'away']
+
+    team_0 = compute_image_for_team(away, image_wd, image_ht)
+    team_1 = compute_image_for_team(home, image_wd, image_ht)
+    return sigmoid(
+        team_0.sum(axis=0) - team_1.sum(axis=0)
+    )
+
+
 def compute_ctrl_prob(play_images):
     return sigmoid(
         play_images[:11].sum(axis=0) - play_images[11:].sum(axis=0)
